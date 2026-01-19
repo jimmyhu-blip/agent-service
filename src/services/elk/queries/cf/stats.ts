@@ -1,3 +1,4 @@
+import { config } from '../../../../config/index.ts';
 import {
 	type OverallStats,
 	overallStatsSchema,
@@ -15,7 +16,7 @@ export const statsQuery: QueryDefinition<OverallStats> = {
 
 	buildQuery: (timeCondition: string) =>
 		`
-FROM across-cf-logpush-*
+FROM ${config.ELK_CLOUDFLARE_INDEX}
 | WHERE ${timeCondition}
 | WHERE NOT ClientRequestURI LIKE "/cdn-cgi/*"
 | STATS 

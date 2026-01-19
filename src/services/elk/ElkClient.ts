@@ -1,15 +1,28 @@
-import { Client } from '@elastic/elasticsearch';
 import { config } from '../../config/index.ts';
+
+interface EsqlResponse {
+	columns: Array<{ name: string; type: string }>;
+	values: unknown[][];
+}
 
 export class ElkClient {
 	private static instance: ElkClient;
-	private client: Client;
+	private baseUrl: string;
+	private headers: Record<string, string>;
 
 	private constructor() {
-		this.client = new Client({
-			node: config.ES_URL,
-			auth: config.ES_API_KEY ? { apiKey: config.ES_API_KEY } : undefined,
-		});
+		this.baseUrl = config.ES_URL;
+		this.headers = {
+			'Content-Type': 'application/json',
+		};
+
+		if (config.ES_API_KEY) {
+			this.headers.Authorization = `ApiKey ${config.ES_API_KEY}`;
+		}
+
+		console.log(`🔗 ES 連線配置: ${this.baseUrl}`);
+		console.log(`🔑 API Key: ${config.ES_API_KEY ? '已設定' : '未設定'}`);
+		console.log(`📂 CF Index: ${config.ELK_CLOUDFLARE_INDEX}`);
 	}
 
 	/**
@@ -29,15 +42,22 @@ export class ElkClient {
 	 */
 	async esql<T = Record<string, unknown>>(query: string): Promise<T[]> {
 		try {
-			const response = await this.client.esql.query({
-				query,
-				format: 'json',
+			const response = await fetch(`${this.baseUrl}/_query?format=json`, {
+				method: 'POST',
+				headers: this.headers,
+				body: JSON.stringify({ query }),
 			});
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(`ES 查詢失敗 (${response.status}): ${errorText}`);
+			}
+
+			const data = (await response.json()) as EsqlResponse;
 
 			// ES|QL 回傳格式：{ columns: [...], values: [...] }
 			// 需要轉換成物件陣列
-			const columns = response.columns as Array<{ name: string; type: string }>;
-			const values = response.values as unknown[][];
+			const { columns, values } = data;
 
 			if (!columns || !values) {
 				return [];
@@ -63,18 +83,14 @@ export class ElkClient {
 	 */
 	async ping(): Promise<boolean> {
 		try {
-			await this.client.ping();
-			return true;
+			const response = await fetch(this.baseUrl, {
+				method: 'GET',
+				headers: this.headers,
+			});
+			return response.ok;
 		} catch {
 			return false;
 		}
-	}
-
-	/**
-	 * 取得原始 ES Client（進階用途）
-	 */
-	getRawClient(): Client {
-		return this.client;
 	}
 }
 

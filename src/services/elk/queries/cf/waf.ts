@@ -1,3 +1,4 @@
+import { config } from '../../../../config/index.ts';
 import { type WafStats, wafStatsSchema } from '../../../../schemas/elk.ts';
 import type { QueryDefinition } from '../types.ts';
 
@@ -12,7 +13,7 @@ export const wafQuery: QueryDefinition<WafStats> = {
 
 	buildQuery: (timeCondition: string) =>
 		`
-FROM across-cf-logpush-*
+FROM ${config.ELK_CLOUDFLARE_INDEX}
 | WHERE ${timeCondition}
 | WHERE NOT ClientRequestURI LIKE "/cdn-cgi/*"
 | WHERE WAFAttackScore < 50 OR WAFSQLiAttackScore < 50 OR WAFXSSAttackScore < 50 OR WAFRCEAttackScore < 50

@@ -1,3 +1,4 @@
+import { config } from '../../../../config/index.ts';
 import {
 	type CredentialStats,
 	credentialStatsSchema,
@@ -15,7 +16,7 @@ export const credentialQuery: QueryDefinition<CredentialStats> = {
 
 	buildQuery: (timeCondition: string) =>
 		`
-FROM across-cf-logpush-*
+FROM ${config.ELK_CLOUDFLARE_INDEX}
 | WHERE ${timeCondition}
 | WHERE NOT ClientRequestURI LIKE "/cdn-cgi/*"
 | WHERE ClientRequestURI LIKE "*login*" OR ClientRequestURI LIKE "*auth*" OR ClientRequestURI LIKE "*signin*"

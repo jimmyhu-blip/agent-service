@@ -1,3 +1,4 @@
+import { config } from '../../../../config/index.ts';
 import {
 	type TunnelStats,
 	tunnelStatsSchema,
@@ -15,7 +16,7 @@ export const tunnelQuery: QueryDefinition<TunnelStats> = {
 
 	buildQuery: (timeCondition: string) =>
 		`
-FROM across-cf-logpush-*
+FROM ${config.ELK_CLOUDFLARE_INDEX}
 | WHERE ${timeCondition}
 | WHERE NOT ClientRequestURI LIKE "/cdn-cgi/*"
 | WHERE ClientRequestHost LIKE "*trycloudflare*" 

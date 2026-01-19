@@ -5,6 +5,9 @@ const envSchema = z.object({
 	ES_URL: z.string().url(),
 	ES_API_KEY: z.string().optional(),
 
+	// ELK Index 設定
+	ELK_CLOUDFLARE_INDEX: z.string().default('across-cf-logpush-*'),
+
 	// Server 設定
 	PORT: z.coerce.number().default(3000),
 
