@@ -9,7 +9,7 @@ const envSchema = z.object({
 	ELK_CLOUDFLARE_INDEX: z.string().default('across-cf-logpush-*'),
 
 	// Server 設定
-	PORT: z.coerce.number().default(3000),
+	PORT: z.coerce.number().default(3210),
 
 	// 未來擴展預留
 	OPENAI_API_KEY: z.string().optional(),
