@@ -41,8 +41,11 @@ export class ElkClient {
 	 * @returns 查詢結果陣列
 	 */
 	async esql<T = Record<string, unknown>>(query: string): Promise<T[]> {
+		const url = `${this.baseUrl}/_query?format=json`;
+		console.log(`📤 ES|QL 請求: ${url}`);
+
 		try {
-			const response = await fetch(`${this.baseUrl}/_query?format=json`, {
+			const response = await fetch(url, {
 				method: 'POST',
 				headers: this.headers,
 				body: JSON.stringify({ query }),
@@ -51,6 +54,8 @@ export class ElkClient {
 					rejectUnauthorized: false,
 				},
 			});
+
+			console.log(`📥 ES 回應狀態: ${response.status}`);
 
 			if (!response.ok) {
 				const errorText = await response.text();
@@ -75,9 +80,23 @@ export class ElkClient {
 				return obj as T;
 			});
 
+			console.log(`✅ ES|QL 查詢成功，回傳 ${results.length} 筆結果`);
 			return results;
 		} catch (error) {
-			console.error('ES|QL 查詢錯誤:', error);
+			console.error('❌ ES|QL 查詢錯誤:');
+			console.error('   URL:', url);
+			console.error(
+				'   Error name:',
+				error instanceof Error ? error.name : 'Unknown',
+			);
+			console.error(
+				'   Error message:',
+				error instanceof Error ? error.message : String(error),
+			);
+			console.error(
+				'   Error stack:',
+				error instanceof Error ? error.stack : 'N/A',
+			);
 			throw error;
 		}
 	}
