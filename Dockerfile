@@ -1,4 +1,8 @@
 FROM oven/bun:1 AS base
+
+# 連結到 GitHub Repository
+LABEL org.opencontainers.image.source=https://github.com/jimmyhu-blip/agent-service
+
 WORKDIR /app
 
 # 安裝依賴

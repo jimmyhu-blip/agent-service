@@ -46,6 +46,10 @@ export class ElkClient {
 				method: 'POST',
 				headers: this.headers,
 				body: JSON.stringify({ query }),
+				verbose: true,
+				tls: {
+					rejectUnauthorized: false,
+				},
 			});
 
 			if (!response.ok) {
@@ -86,9 +90,14 @@ export class ElkClient {
 			const response = await fetch(this.baseUrl, {
 				method: 'GET',
 				headers: this.headers,
+				verbose: true,
+				tls: {
+					rejectUnauthorized: false,
+				},
 			});
 			return response.ok;
-		} catch {
+		} catch (error) {
+			console.error('ES 連線測試失敗:', error);
 			return false;
 		}
 	}
